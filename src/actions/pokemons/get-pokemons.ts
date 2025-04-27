@@ -3,9 +3,7 @@ import { Pokemon } from '../../domain/entities/pokemon';
 import type { PokeAPIPaginatedResponse, PokeAPIPokemon } from '../../infrastructure/interfaces/pokeApi.interfaces';
 import { PokemonMapper } from '../../infrastructure/mappers/pokemon.mapper';
 
-export const getPokemons = async (page: number, limit: number): Promise<Pokemon[]> => {
-
-    console.log('llamada a getPokemon!');
+export const getPokemons = async (page: number, limit?: number): Promise<Pokemon[]> => {
 
     try {
         const url = `/pokemon?offset=${page * 10}&limit=${limit}`;
@@ -16,11 +14,9 @@ export const getPokemons = async (page: number, limit: number): Promise<Pokemon[
         });
 
         const pokeApiPokemons = await Promise.all(pokemonPromises);
-        const pokemons = pokeApiPokemons.map(item => PokemonMapper.pokeApiPokemonsToEntity(item.data))
+        const pokemonsPromises = pokeApiPokemons.map(item => PokemonMapper.pokeApiPokemonsToEntity(item.data))
 
-        console.log({ pokemons });
-
-        return pokemons;
+        return await Promise.all(pokemonsPromises);
 
     } catch (error) {
         console.log(error);
